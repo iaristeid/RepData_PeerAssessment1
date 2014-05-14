@@ -1,7 +1,7 @@
 Coursera: Reproducible Research - Peer Assignment 1 (May 2014)
 ==============================================================
 ```{r}
-Sys.getlocale(category = "LC_ALL")
+# Sys.getlocale(category = "LC_ALL")
 Sys.setlocale("LC_TIME", 'English_US')
 ```
 
@@ -29,12 +29,13 @@ ActTable <- data.table(activity)
 ## names(ActTable)
 ActTotalPerDayTable <- ActTable[,sum(steps),by=date]
 setNames(ActTotalPerDayTable,c("date","total_steps"))
+png(filename="./figures/TotalStepsPerDayHist.png", width=480,height=480)
 hist(ActTotalPerDayTable$total_steps, main="Total Number of steps per day", xlab="Total Number of steps",)
-dev.copy(png, file = "./figures/TotalStepsPerDayHist.png")
+# dev.copy(png, file = "./figures/TotalStepsPerDayHist.png")
 dev.off()
-
-![Total Steps Per Day](figures/TotalStepsPerDayHist.png) 
 ```
+![Total Steps Per Day](figures/TotalStepsPerDayHist.png) 
+
 
 ### Calculate the *mean* and *median* total number of steps taken per day
 
@@ -48,10 +49,14 @@ summary(ActTotalPerDayTable)
 ```{r}
 ActTMeanPer5minTable <- ActTable[,mean(steps),by=interval]
 setNames(ActTMeanPer5minTable,c("interval","average_steps"))
+png(filename="./figures/AvgStepsPerInterval.png", width=480,height=480)
 plot(ActTMeanPer5minTable, type="l",main="Time series plot of the average number of steps taken")
-dev.copy(png, file = "./figures/AvgStepsPerInterval.png")
+# dev.copy(png, file = "./figures/AvgStepsPerInterval.png")
 dev.off()
 ```
+
+![Average Steps Per Interval](figures/AvgStepsPerInterval.png) 
+
 ### Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 ```{r}
 summary(ActTMeanPer5minTable)
@@ -88,10 +93,13 @@ head(activity_filled)
 FilledTable <- data.table(activity_filled)
 ActTotalPerDayFilledTable <- FilledTable[,sum(steps),by=date]
 setNames(ActTotalPerDayFilledTable,c("date","total_steps"))
-hist(ActTotalPerDayFilledTable$total_steps, main="Total Number of steps per day", xlab="Total Number of steps",)
-dev.copy(png, file = "./figures/TotalStepsPerDaySimulatedHist.png")
+png(filename="./figures/TotalStepsPerDaySimulatedHist.png", width=480,height=480)
+hist(ActTotalPerDayFilledTable$total_steps, main="Total Number of steps per day (simulated)", xlab="Total Number of steps",)
+# dev.copy(png, file = "./figures/TotalStepsPerDaySimulatedHist.png")
 dev.off()
 ```
+
+![Total Steps Per Day (Simulated)](figures/TotalStepsPerDaySimulatedHist.png) 
 
 ### Calculate and report the mean and median total number of steps taken per day. 
 ``` {r}
@@ -132,7 +140,10 @@ summary(activity_filled)
 ### Make a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 ```{r}
 library(lattice)
+png(filename="./figures/AvgStepsWeekendsVsWeekdays.png", width=480,height=480)
 xyplot(average_steps ~ interval | DayType, data = activity_filled, type="l",layout = c(1, 2))
-dev.copy(png, file = "./figures/AvgStepsWeekendsVsWeekdays.png")
+# dev.copy(png, file = "./figures/AvgStepsWeekendsVsWeekdays.png")
 dev.off()
 ```
+
+![Average Steps Per Interval (Weekends vs Weekdays)](figures/AvgStepsWeekendsVsWeekdays.png) 
