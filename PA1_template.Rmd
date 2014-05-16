@@ -10,13 +10,10 @@ Sys.setlocale("LC_TIME", 'English_US')
 ### Load the data
 ``` {r}
 activity_original <- read.csv("./activity.csv",sep=",",header=TRUE, quote="", strip.white=TRUE, stringsAsFactors=FALSE, col.names=c("steps","date","interval"))
-## activity$date <- as.Date(activity$date,format="%Y-%m-%d")
 ```
 ### Process/transform the data (if necessary) into a format suitable for your analysis
 ```{r}
 activity <- activity_original[!is.na(activity_original$steps),]
-## head(activity)
-## activity$date <- as.Date(activity$date,format="%Y-%m-%d")
 ```
 
 
@@ -41,14 +38,16 @@ dev.off()
 
 ``` {r}
 summary(ActTotalPerDayTable)
+ActTMedianPer5minTable <- ActTable[,median(steps),by=interval]
+setNames(ActTMedianPer5minTable,c("interval","median"))
+ActTMeanPer5minTable <- ActTable[,mean(steps),by=interval]
+setNames(ActTMeanPer5minTable,c("interval","mean_steps"))
 ```
 
 ## What is the average daily activity pattern?
 
 ### Make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 ```{r}
-ActTMeanPer5minTable <- ActTable[,mean(steps),by=interval]
-setNames(ActTMeanPer5minTable,c("interval","average_steps"))
 png(filename="./figures/AvgStepsPerInterval.png", width=480,height=480)
 plot(ActTMeanPer5minTable, type="l",main="Time series plot of the average number of steps taken")
 # dev.copy(png, file = "./figures/AvgStepsPerInterval.png")
@@ -60,7 +59,7 @@ dev.off()
 ### Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 ```{r}
 summary(ActTMeanPer5minTable)
-indexMax <- ActTMeanPer5minTable[,which.max(average_steps)]
+indexMax <- ActTMeanPer5minTable[,which.max(mean_steps)]
 ActTMeanPer5minTable[indexMax,]
 ```
 
@@ -84,7 +83,7 @@ meanPerInterval <- as.data.frame(ActTMeanPer5minTable[,])
 names(meanPerInterval)
 activity_filled <- merge(x=activity_original,y=meanPerInterval, by.x="interval",all = TRUE)
 names(activity_filled)
-activity_filled$steps[is.na(activity_filled$steps)] <- activity_filled$average_steps[is.na(activity_filled$steps)]
+activity_filled$steps[is.na(activity_filled$steps)] <- activity_filled$mean_steps[is.na(activity_filled$steps)]
 head(activity_filled)
 ```
 
@@ -126,7 +125,6 @@ Use the dataset with the filled-in missing values for this part.
 
 ### Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
 ```{r}
-# activity_filled$DayType <- strftime((strptime(as.character(activity_filled$date),format="\"%Y-%m-%d\"")),format="%A")
 activity_filled$DayType <- weekdays(strptime(as.character(activity_filled$date),format="\"%Y-%m-%d\""))
 
 head(activity_filled)
@@ -141,7 +139,7 @@ summary(activity_filled)
 ```{r}
 library(lattice)
 png(filename="./figures/AvgStepsWeekendsVsWeekdays.png", width=480,height=480)
-xyplot(average_steps ~ interval | DayType, data = activity_filled, type="l",layout = c(1, 2))
+xyplot(mean_steps ~ interval | DayType, data = activity_filled, type="l",layout = c(1, 2))
 # dev.copy(png, file = "./figures/AvgStepsWeekendsVsWeekdays.png")
 dev.off()
 ```

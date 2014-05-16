@@ -19,14 +19,12 @@ Sys.setlocale("LC_TIME", "English_US")
 activity_original <- read.csv("./activity.csv", sep = ",", header = TRUE, quote = "", 
     strip.white = TRUE, stringsAsFactors = FALSE, col.names = c("steps", "date", 
         "interval"))
-## activity$date <- as.Date(activity$date,format='%Y-%m-%d')
 ```
 
 ### Process/transform the data (if necessary) into a format suitable for your analysis
 
 ```r
 activity <- activity_original[!is.na(activity_original$steps), ]
-## head(activity) activity$date <- as.Date(activity$date,format='%Y-%m-%d')
 ```
 
 
@@ -134,30 +132,50 @@ summary(ActTotalPerDayTable)
 ##                     Max.   :21194
 ```
 
+```r
+ActTMedianPer5minTable <- ActTable[, median(steps), by = interval]
+setNames(ActTMedianPer5minTable, c("interval", "median"))
+```
+
+```
+##      interval median
+##   1:        0      0
+##   2:        5      0
+##   3:       10      0
+##   4:       15      0
+##   5:       20      0
+##  ---                
+## 284:     2335      0
+## 285:     2340      0
+## 286:     2345      0
+## 287:     2350      0
+## 288:     2355      0
+```
+
+```r
+ActTMeanPer5minTable <- ActTable[, mean(steps), by = interval]
+setNames(ActTMeanPer5minTable, c("interval", "mean_steps"))
+```
+
+```
+##      interval mean_steps
+##   1:        0    1.71698
+##   2:        5    0.33962
+##   3:       10    0.13208
+##   4:       15    0.15094
+##   5:       20    0.07547
+##  ---                    
+## 284:     2335    4.69811
+## 285:     2340    3.30189
+## 286:     2345    0.64151
+## 287:     2350    0.22642
+## 288:     2355    1.07547
+```
+
 
 ## What is the average daily activity pattern?
 
 ### Make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
-
-```r
-ActTMeanPer5minTable <- ActTable[, mean(steps), by = interval]
-setNames(ActTMeanPer5minTable, c("interval", "average_steps"))
-```
-
-```
-##      interval average_steps
-##   1:        0       1.71698
-##   2:        5       0.33962
-##   3:       10       0.13208
-##   4:       15       0.15094
-##   5:       20       0.07547
-##  ---                       
-## 284:     2335       4.69811
-## 285:     2340       3.30189
-## 286:     2345       0.64151
-## 287:     2350       0.22642
-## 288:     2355       1.07547
-```
 
 ```r
 png(filename = "./figures/AvgStepsPerInterval.png", width = 480, height = 480)
@@ -181,7 +199,7 @@ summary(ActTMeanPer5minTable)
 ```
 
 ```
-##     interval    average_steps   
+##     interval      mean_steps    
 ##  Min.   :   0   Min.   :  0.00  
 ##  1st Qu.: 589   1st Qu.:  2.49  
 ##  Median :1178   Median : 34.11  
@@ -191,13 +209,13 @@ summary(ActTMeanPer5minTable)
 ```
 
 ```r
-indexMax <- ActTMeanPer5minTable[, which.max(average_steps)]
+indexMax <- ActTMeanPer5minTable[, which.max(mean_steps)]
 ActTMeanPer5minTable[indexMax, ]
 ```
 
 ```
-##    interval average_steps
-## 1:      835         206.2
+##    interval mean_steps
+## 1:      835      206.2
 ```
 
 
@@ -231,7 +249,7 @@ names(meanPerInterval)
 ```
 
 ```
-## [1] "interval"      "average_steps"
+## [1] "interval"   "mean_steps"
 ```
 
 ```r
@@ -241,22 +259,22 @@ names(activity_filled)
 ```
 
 ```
-## [1] "interval"      "steps"         "date"          "average_steps"
+## [1] "interval"   "steps"      "date"       "mean_steps"
 ```
 
 ```r
-activity_filled$steps[is.na(activity_filled$steps)] <- activity_filled$average_steps[is.na(activity_filled$steps)]
+activity_filled$steps[is.na(activity_filled$steps)] <- activity_filled$mean_steps[is.na(activity_filled$steps)]
 head(activity_filled)
 ```
 
 ```
-##   interval steps         date average_steps
-## 1        0 1.717 "2012-10-01"         1.717
-## 2        0 0.000 "2012-11-23"         1.717
-## 3        0 0.000 "2012-10-28"         1.717
-## 4        0 0.000 "2012-11-06"         1.717
-## 5        0 0.000 "2012-11-24"         1.717
-## 6        0 0.000 "2012-11-15"         1.717
+##   interval steps         date mean_steps
+## 1        0 1.717 "2012-10-01"      1.717
+## 2        0 0.000 "2012-11-23"      1.717
+## 3        0 0.000 "2012-10-28"      1.717
+## 4        0 0.000 "2012-11-06"      1.717
+## 5        0 0.000 "2012-11-24"      1.717
+## 6        0 0.000 "2012-11-15"      1.717
 ```
 
 
@@ -388,8 +406,6 @@ Use the dataset with the filled-in missing values for this part.
 ### Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
 
 ```r
-# activity_filled$DayType <-
-# strftime((strptime(as.character(activity_filled$date),format='\'%Y-%m-%d\'')),format='%A')
 activity_filled$DayType <- weekdays(strptime(as.character(activity_filled$date), 
     format = "\"%Y-%m-%d\""))
 
@@ -397,13 +413,13 @@ head(activity_filled)
 ```
 
 ```
-##   interval steps         date average_steps  DayType
-## 1        0 1.717 "2012-10-01"         1.717   Monday
-## 2        0 0.000 "2012-11-23"         1.717   Friday
-## 3        0 0.000 "2012-10-28"         1.717   Sunday
-## 4        0 0.000 "2012-11-06"         1.717  Tuesday
-## 5        0 0.000 "2012-11-24"         1.717 Saturday
-## 6        0 0.000 "2012-11-15"         1.717 Thursday
+##   interval steps         date mean_steps  DayType
+## 1        0 1.717 "2012-10-01"      1.717   Monday
+## 2        0 0.000 "2012-11-23"      1.717   Friday
+## 3        0 0.000 "2012-10-28"      1.717   Sunday
+## 4        0 0.000 "2012-11-06"      1.717  Tuesday
+## 5        0 0.000 "2012-11-24"      1.717 Saturday
+## 6        0 0.000 "2012-11-15"      1.717 Thursday
 ```
 
 ```r
@@ -413,13 +429,13 @@ head(activity_filled)
 ```
 
 ```
-##   interval steps         date average_steps DayType
-## 1        0 1.717 "2012-10-01"         1.717 weekday
-## 2        0 0.000 "2012-11-23"         1.717 weekday
-## 3        0 0.000 "2012-10-28"         1.717 weekend
-## 4        0 0.000 "2012-11-06"         1.717 weekday
-## 5        0 0.000 "2012-11-24"         1.717 weekend
-## 6        0 0.000 "2012-11-15"         1.717 weekday
+##   interval steps         date mean_steps DayType
+## 1        0 1.717 "2012-10-01"      1.717 weekday
+## 2        0 0.000 "2012-11-23"      1.717 weekday
+## 3        0 0.000 "2012-10-28"      1.717 weekend
+## 4        0 0.000 "2012-11-06"      1.717 weekday
+## 5        0 0.000 "2012-11-24"      1.717 weekend
+## 6        0 0.000 "2012-11-15"      1.717 weekday
 ```
 
 ```r
@@ -428,7 +444,7 @@ summary(activity_filled)
 ```
 
 ```
-##     interval        steps           date           average_steps   
+##     interval        steps           date             mean_steps    
 ##  Min.   :   0   Min.   :  0.0   Length:17568       Min.   :  0.00  
 ##  1st Qu.: 589   1st Qu.:  0.0   Class :character   1st Qu.:  2.49  
 ##  Median :1178   Median :  0.0   Mode  :character   Median : 34.11  
@@ -450,7 +466,7 @@ summary(activity_filled)
 ```r
 library(lattice)
 png(filename = "./figures/AvgStepsWeekendsVsWeekdays.png", width = 480, height = 480)
-xyplot(average_steps ~ interval | DayType, data = activity_filled, type = "l", 
+xyplot(mean_steps ~ interval | DayType, data = activity_filled, type = "l", 
     layout = c(1, 2))
 # dev.copy(png, file = './figures/AvgStepsWeekendsVsWeekdays.png')
 dev.off()
